@@ -87,9 +87,9 @@ button{cursor:pointer}
 .item{width:100%;display:grid;grid-template-columns:14px 1fr auto;align-items:center;gap:12px;padding:13px 16px;border:0;border-top:1px solid var(--line);background:none;text-align:left;min-height:56px}
 .item:first-child{border-top:0}
 .item:active{background:var(--soft)}
-.item-cat{font-weight:700}
-.item-cat em{font-style:normal;font-weight:400;color:var(--muted)}
-.item-memo{display:block;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46vw}
+.item-body{min-width:0}
+.item-cat{display:block;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-memo{display:block;font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .item-amt{font-variant-numeric:tabular-nums;font-weight:700}
 
 .empty{text-align:center;padding:40px 16px;color:var(--muted)}
@@ -633,11 +633,15 @@ function historyListHTML(){
   es.forEach(p => { const a = byDay.get(p[0].date) || []; a.push(p[0]); byDay.set(p[0].date, a); });
   byDay.forEach((list, date) => {
     html += '<section class="day"><div class="day-head"><span>'+dayLabelY(date, searching)+'</span><b>'+yen(sum(list))+'</b></div><div class="list">'+
-      list.map(e => '<button class="item" data-action="edit" data-id="'+esc(e.id)+'">'+
-        '<span class="dot" style="background:'+colorOf(e.category)+'"></span>'+
-        '<span><span class="item-cat">'+esc(e.category)+(e.sub?'<em>／'+esc(e.sub)+'</em>':'')+'</span>'+
-        (e.memo?'<span class="item-memo">'+esc(e.memo)+'</span>':'')+'</span>'+
-        '<span class="item-amt">'+yen(e.amount)+'</span></button>').join('')+'</div></section>';
+      list.map(e => {
+        const title = e.memo || e.sub || e.category;
+        const subline = (e.memo && e.sub) ? e.sub : '';
+        return '<button class="item" data-action="edit" data-id="'+esc(e.id)+'">'+
+          '<span class="dot" role="img" aria-label="'+esc(e.category)+'" style="background:'+colorOf(e.category)+'"></span>'+
+          '<span class="item-body"><span class="item-cat">'+esc(title)+'</span>'+
+          (subline ? '<span class="item-memo">'+esc(subline)+'</span>' : '')+'</span>'+
+          '<span class="item-amt">'+yen(e.amount)+'</span></button>';
+      }).join('')+'</div></section>';
   });
   return html;
 }
